@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>z.ai Limits</title>
+    <style>
+      :root {
+        --bg: #0f1117;
+        --surface: #1a1d27;
+        --surface-hover: #222636;
+        --border: #2a2e3b;
+        --text: #e4e4e7;
+        --text-muted: #9ca3af;
+        --green: #22c55e;
+        --green-bg: rgba(34, 197, 94, 0.12);
+        --yellow: #eab308;
+        --yellow-bg: rgba(234, 179, 8, 0.12);
+        --red: #ef4444;
+        --red-bg: rgba(239, 68, 68, 0.12);
+        --accent: #6366f1;
+        --accent-bg: rgba(99, 102, 241, 0.12);
+        --radius: 12px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 32px;
+        border-bottom: 1px solid var(--border);
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .header-left h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+
+      .subtitle {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-top: 2px;
+      }
+
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 4px 14px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        background: var(--accent-bg);
+        color: var(--accent);
+        border: 1px solid rgba(99, 102, 241, 0.25);
+      }
+
+      #last-updated {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+      }
+
+      main {
+        flex: 1;
+        padding: 24px 32px;
+      }
+
+      #loading {
+        text-align: center;
+        padding: 48px 0;
+        color: var(--text-muted);
+      }
+
+      .spinner {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        border: 3px solid var(--border);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      #error-container {
+        background: var(--red-bg);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+        border-radius: var(--radius);
+        padding: 16px 20px;
+        color: var(--red);
+        margin-bottom: 20px;
+      }
+
+      #cards-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: 20px;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px 24px;
+        transition: border-color 0.2s;
+      }
+
+      .card:hover {
+        border-color: #3a3f50;
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      .card-type {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+      }
+
+      .card-period {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+      }
+
+      .progress-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .progress-bar {
+        flex: 1;
+        height: 8px;
+        background: var(--border);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        border-radius: 999px;
+        transition: width 0.6s ease;
+      }
+
+      .progress-fill.green {
+        background: var(--green);
+      }
+
+      .progress-fill.yellow {
+        background: var(--yellow);
+      }
+
+      .progress-fill.red {
+        background: var(--red);
+      }
+
+      .percentage-label {
+        font-size: 1.1rem;
+        font-weight: 700;
+        min-width: 48px;
+        text-align: right;
+      }
+
+      .percentage-label.green {
+        color: var(--green);
+      }
+
+      .percentage-label.yellow {
+        color: var(--yellow);
+      }
+
+      .percentage-label.red {
+        color: var(--red);
+      }
+
+      .card-stats {
+        display: flex;
+        gap: 24px;
+        margin-bottom: 12px;
+        font-size: 0.85rem;
+      }
+
+      .stat-label {
+        color: var(--text-muted);
+      }
+
+      .stat-value {
+        font-weight: 600;
+      }
+
+      .breakdown {
+        margin: 12px 0;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
+      }
+
+      .breakdown-title {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+      }
+
+      .breakdown-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 4px 0;
+        font-size: 0.82rem;
+      }
+
+      .breakdown-model {
+        font-family: "SF Mono", "Cascadia Code", "Fira Code", monospace;
+        min-width: 110px;
+        color: var(--text-muted);
+      }
+
+      .breakdown-bar {
+        flex: 1;
+        height: 4px;
+        background: var(--border);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .breakdown-fill {
+        height: 100%;
+        border-radius: 999px;
+      }
+
+      .breakdown-fill.green { background: var(--green); }
+      .breakdown-fill.yellow { background: var(--yellow); }
+      .breakdown-fill.red { background: var(--red); }
+
+      .breakdown-value {
+        min-width: 40px;
+        text-align: right;
+        color: var(--text-muted);
+      }
+
+      .countdown {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-top: 8px;
+      }
+
+      footer {
+        border-top: 1px solid var(--border);
+        padding: 16px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .config-section {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .config-section label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+      }
+
+      .config-section input {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-size: 0.8rem;
+        width: 320px;
+        font-family: "SF Mono", "Cascadia Code", "Fira Code", monospace;
+      }
+
+      .config-section input:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+
+      button {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 6px;
+        padding: 6px 14px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+      }
+
+      button:hover {
+        border-color: #3a3f50;
+        background: var(--surface-hover);
+      }
+
+      .auto-refresh-info {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="header-left">
+        <h1>z.ai Limits</h1>
+        <div class="subtitle">API Usage Quota Dashboard</div>
+      </div>
+      <div class="header-right">
+        <div id="level-badge" class="badge">--</div>
+        <div id="last-updated">Last updated: --</div>
+      </div>
+    </header>
+
+    <main>
+      <div id="loading"><span class="spinner"></span> Loading quota data...</div>
+      <div id="error-container" hidden></div>
+      <div id="cards-container"></div>
+    </main>
+
+    <footer>
+      <div class="config-section">
+        <label for="api-key-input">API Key:</label>
+        <input type="password" id="api-key-input" />
+        <button id="toggle-key-btn">Show</button>
+        <button id="refresh-btn">Refresh</button>
+      </div>
+      <div class="auto-refresh-info">Auto-refreshes every 5 minutes</div>
+    </footer>
+
+    <script>
+      const API_URL = "https://api.z.ai/api/monitor/usage/quota/limit";
+      const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+      const LS_KEY = "api_key";
+
+      const UNIT_MAP = { 3: "Hour", 5: "Month", 6: "Week" };
+      const TYPE_MAP = { TIME_LIMIT: "Request Count", TOKENS_LIMIT: "Token Usage" };
+
+      function describePeriod(unit, number) {
+        const name = UNIT_MAP[unit] || `Unit ${unit}`;
+        if (number === 1) {
+          return name === "Day"
+            ? "Daily"
+            : name === "Month"
+              ? "Monthly"
+              : name === "Year"
+                ? "Yearly"
+                : `1 ${name}`;
+        }
+        return `${number} ${name}s`;
+      }
+
+      function getColorClass(percentage) {
+        if (percentage < 50) return "green";
+        if (percentage < 80) return "yellow";
+        return "red";
+      }
+
+      function formatCountdown(resetTimeMs) {
+        const diff = resetTimeMs - Date.now();
+        if (diff <= 0) return "Overdue \u2014 refresh to update";
+
+        const days = Math.floor(diff / 86400000);
+        const hours = Math.floor((diff % 86400000) / 3600000);
+        const minutes = Math.floor((diff % 3600000) / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+
+        const parts = [];
+        if (days > 0) parts.push(`${days}d`);
+        if (hours > 0) parts.push(`${hours}h`);
+        if (minutes > 0) parts.push(`${minutes}m`);
+        if (parts.length === 0) parts.push(`${seconds}s`);
+
+        return "Resets in " + parts.join(" ");
+      }
+
+      async function fetchQuotaData(apiKey) {
+        const res = await fetch(API_URL, {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            Accept: "application/json",
+          },
+        });
+
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) {
+            throw new Error("Authentication failed. Please check your API key.");
+          }
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+
+        const json = await res.json();
+        if (!json.success || json.code !== 200) {
+          throw new Error(json.msg || "API returned unsuccessful response");
+        }
+        return json.data;
+      }
+
+      function renderLimitCard(limit) {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const pct = Math.min(limit.percentage, 100);
+        const color = getColorClass(pct);
+        const period = describePeriod(limit.unit, limit.number);
+        const typeLabel = TYPE_MAP[limit.type] || limit.type;
+
+        let html = `
+        <div class="card-header">
+          <span class="card-type">${typeLabel}</span>
+          <span class="card-period">${period}</span>
+        </div>
+        <div class="progress-row">
+          <div class="progress-bar">
+            <div class="progress-fill ${color}" style="width: ${pct}%"></div>
+          </div>
+          <span class="percentage-label ${color}">${pct}%</span>
+        </div>`;
+
+        if (limit.type === "TIME_LIMIT" && limit.usage != null) {
+          html += `
+        <div class="card-stats">
+          <span><span class="stat-label">Used: </span><span class="stat-value">${limit.currentValue ?? "--"} / ${limit.usage}</span></span>
+          <span><span class="stat-label">Remaining: </span><span class="stat-value">${limit.remaining ?? "--"}</span></span>
+        </div>`;
+
+          if (limit.usageDetails?.length) {
+            const total = limit.usage || 1;
+            html += `<div class="breakdown"><div class="breakdown-title">Model Breakdown</div>`;
+            for (const d of limit.usageDetails) {
+              const dPct = Math.min((d.usage / total) * 100, 100);
+              const dColor = getColorClass(dPct);
+              html += `
+            <div class="breakdown-row">
+              <span class="breakdown-model">${d.modelCode}</span>
+              <div class="breakdown-bar">
+                <div class="breakdown-fill ${dColor}" style="width: ${dPct}%"></div>
+              </div>
+              <span class="breakdown-value">${d.usage}</span>
+            </div>`;
+            }
+            html += `</div>`;
+          }
+        }
+
+        if (limit.nextResetTime) {
+          html += `<div class="countdown" data-reset-time="${limit.nextResetTime}">${formatCountdown(limit.nextResetTime)}</div>`;
+        }
+
+        card.innerHTML = html;
+        return card;
+      }
+
+      function renderDashboard(data) {
+        document.getElementById("level-badge").textContent = (data.level || "--").toUpperCase();
+        document.getElementById("last-updated").textContent =
+          "Last updated: " + new Date().toLocaleTimeString();
+
+        const container = document.getElementById("cards-container");
+        container.innerHTML = "";
+
+        for (const limit of data.limits || []) {
+          container.appendChild(renderLimitCard(limit));
+        }
+      }
+
+      function updateCountdowns() {
+        for (const el of document.querySelectorAll("[data-reset-time]")) {
+          const t = Number(el.dataset.resetTime);
+          if (t) el.textContent = formatCountdown(t);
+        }
+      }
+
+      let refreshTimer = null;
+      let consecutiveFailures = 0;
+
+      function scheduleRefresh(interval) {
+        if (refreshTimer) clearInterval(refreshTimer);
+        const ms = interval || (consecutiveFailures >= 3 ? 15 * 60000 : REFRESH_INTERVAL_MS);
+        refreshTimer = setInterval(() => loadDashboard(), ms);
+      }
+
+      async function loadDashboard() {
+        const loading = document.getElementById("loading");
+        const errorEl = document.getElementById("error-container");
+        const container = document.getElementById("cards-container");
+
+        errorEl.hidden = true;
+        loading.hidden = false;
+
+        const apiKey = document.getElementById("api-key-input").value.trim();
+
+        try {
+          const data = await fetchQuotaData(apiKey);
+          renderDashboard(data);
+          consecutiveFailures = 0;
+          scheduleRefresh();
+        } catch (err) {
+          errorEl.textContent = err.message;
+          errorEl.hidden = false;
+          container.innerHTML = "";
+          consecutiveFailures++;
+          scheduleRefresh();
+        } finally {
+          loading.hidden = true;
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const input = document.getElementById("api-key-input");
+        const savedKey = localStorage.getItem(LS_KEY) || "";
+        input.value = savedKey;
+
+        input.addEventListener("change", () => {
+          localStorage.setItem(LS_KEY, input.value.trim());
+        });
+
+        document.getElementById("refresh-btn").addEventListener("click", () => {
+          loadDashboard();
+        });
+
+        document.getElementById("toggle-key-btn").addEventListener("click", (e) => {
+          const isPassword = input.type === "password";
+          input.type = isPassword ? "text" : "password";
+          e.target.textContent = isPassword ? "Hide" : "Show";
+        });
+
+        setInterval(updateCountdowns, 15000);
+        loadDashboard();
+      });
+    </script>
+  </body>
+</html>
